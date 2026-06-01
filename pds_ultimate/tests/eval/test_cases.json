@@ -1,0 +1,1160 @@
+{
+  "version": "1.0",
+  "description": "PDS-Ultimate Evaluation Test Cases — 100+ golden tests",
+  "categories": {
+    "mode_selection": "Correct dispatch mode (simple/tool_loop/planned)",
+    "tool_selection": "Correct tool(s) chosen for the task",
+    "response_quality": "Answer quality heuristics",
+    "sub_agent_classification": "Typed sub-agent selection accuracy",
+    "plan_quality": "DAG plan structure correctness",
+    "complexity_classification": "Planner complexity classification",
+    "task_verifier": "TaskVerifier heuristic quality checks",
+    "end_to_end": "Full agent execution scenarios"
+  },
+  "test_cases": [
+    {
+      "id": "mode_01",
+      "category": "mode_selection",
+      "input": "Привет",
+      "expected_mode": "simple",
+      "description": "Simple greeting → simple mode"
+    },
+    {
+      "id": "mode_02",
+      "category": "mode_selection",
+      "input": "Спасибо",
+      "expected_mode": "simple",
+      "description": "Simple thanks → simple mode"
+    },
+    {
+      "id": "mode_03",
+      "category": "mode_selection",
+      "input": "Ок",
+      "expected_mode": "simple",
+      "description": "Short confirmation → simple mode"
+    },
+    {
+      "id": "mode_04",
+      "category": "mode_selection",
+      "input": "Который час?",
+      "expected_mode": "tool_loop",
+      "description": "Question with ? -> tool_loop (LLM classifies as NORMAL)"
+    },
+    {
+      "id": "mode_05",
+      "category": "mode_selection",
+      "input": "Как дела?",
+      "expected_mode": "tool_loop",
+      "description": "Question with ? -> tool_loop (LLM classifies as NORMAL)"
+    },
+    {
+      "id": "mode_06",
+      "category": "mode_selection",
+      "input": "Создай заказ на 5 футболок красных размер M",
+      "expected_mode": "tool_loop",
+      "description": "Single tool task → tool_loop"
+    },
+    {
+      "id": "mode_07",
+      "category": "mode_selection",
+      "input": "Покажи баланс",
+      "expected_mode": "simple",
+      "description": "Short finance query -> simple (both analyzers say SIMPLE)"
+    },
+    {
+      "id": "mode_08",
+      "category": "mode_selection",
+      "input": "Переведи hello world на русский",
+      "expected_mode": "simple",
+      "description": "Simple translation → simple mode"
+    },
+    {
+      "id": "mode_09",
+      "category": "mode_selection",
+      "input": "Проанализируй и сравни продажи за 3 месяца, создай отчёт по шагам",
+      "expected_mode": "planned",
+      "description": "Complex multi-step → planned mode"
+    },
+    {
+      "id": "mode_10",
+      "category": "mode_selection",
+      "input": "Исследуй рынок, сравни цены конкурентов и создай подробный отчёт",
+      "expected_mode": "planned",
+      "description": "Multiple complex keywords → planned mode"
+    },
+    {
+      "id": "mode_11",
+      "category": "mode_selection",
+      "input": "Напиши Милане привет",
+      "expected_mode": "simple",
+      "description": "Short messaging -> simple (both analyzers say SIMPLE)"
+    },
+    {
+      "id": "mode_12",
+      "category": "mode_selection",
+      "input": "Сколько у меня контактов?",
+      "expected_mode": "simple",
+      "description": "Simple question with ? → simple"
+    },
+    {
+      "id": "mode_13",
+      "category": "mode_selection",
+      "input": "Найди информацию о курсе доллара и рассчитай расходы за неделю подробно",
+      "expected_mode": "planned",
+      "description": "Research + calculate + подробно → planned"
+    },
+    {
+      "id": "mode_14",
+      "category": "mode_selection",
+      "input": "Добрый вечер!",
+      "expected_mode": "simple",
+      "description": "Evening greeting → simple"
+    },
+    {
+      "id": "mode_15",
+      "category": "mode_selection",
+      "input": "Запиши расход 200 TMT на доставку",
+      "expected_mode": "simple",
+      "description": "Short expense command -> simple (both analyzers say SIMPLE)"
+    },
+    {
+      "id": "complexity_01",
+      "category": "complexity_classification",
+      "input": "Привет",
+      "expected_planner_complexity": "simple",
+      "description": "Short greeting → SIMPLE"
+    },
+    {
+      "id": "complexity_02",
+      "category": "complexity_classification",
+      "input": "Проанализируй и сравни продажи за 3 месяца создай отчёт по шагам",
+      "expected_planner_complexity": "complex",
+      "description": "analyze+compare+report+by_steps → COMPLEX (4 keywords)"
+    },
+    {
+      "id": "complexity_03",
+      "category": "complexity_classification",
+      "input": "Исследуй рынок подробно",
+      "expected_planner_complexity": "complex",
+      "description": "research+detailed → COMPLEX (2 keywords)"
+    },
+    {
+      "id": "complexity_04",
+      "category": "complexity_classification",
+      "input": "Добрый день",
+      "expected_planner_complexity": "simple",
+      "description": "Short greeting → SIMPLE"
+    },
+    {
+      "id": "complexity_05",
+      "category": "complexity_classification",
+      "input": "Рассчитай сумму расходов за последние 7 дней, это очень важно и нужно сделать быстро, прошу помоги мне",
+      "expected_planner_complexity": "moderate",
+      "description": "Single complex keyword + long message → MODERATE"
+    },
+    {
+      "id": "complexity_06",
+      "category": "complexity_classification",
+      "input": "Ок",
+      "expected_planner_complexity": "simple",
+      "description": "Very short → SIMPLE"
+    },
+    {
+      "id": "complexity_07",
+      "category": "complexity_classification",
+      "input": "Сначала найди курс, потом рассчитай итог",
+      "expected_planner_complexity": "complex",
+      "description": "сначала+потом+рассчитай → COMPLEX (3 keywords)"
+    },
+    {
+      "id": "complexity_08",
+      "category": "complexity_classification",
+      "input": "Что такое Python?",
+      "expected_planner_complexity": "simple",
+      "description": "Simple question → SIMPLE"
+    },
+    {
+      "id": "complexity_09",
+      "category": "complexity_classification",
+      "input": "Первое предложение. Второе предложение. Третье предложение. Четвертое.",
+      "expected_planner_complexity": "moderate",
+      "description": "4 sentences → MODERATE"
+    },
+    {
+      "id": "complexity_10",
+      "category": "complexity_classification",
+      "input": "Как зовут? Сколько лет?",
+      "expected_planner_complexity": "moderate",
+      "description": "2 questions → MODERATE"
+    },
+    {
+      "id": "tool_01",
+      "category": "tool_selection",
+      "input": "Создай заказ на 5 футболок",
+      "expected_tools": [
+        "create_order"
+      ],
+      "description": "Order creation → create_order"
+    },
+    {
+      "id": "tool_02",
+      "category": "tool_selection",
+      "input": "Покажи финансовый отчёт",
+      "expected_tools": [
+        "get_financial_summary"
+      ],
+      "description": "Finance report → get_financial_summary"
+    },
+    {
+      "id": "tool_03",
+      "category": "tool_selection",
+      "input": "Переведи на английский: Привет мир",
+      "expected_tools": [
+        "translate_text"
+      ],
+      "description": "Translation → translate_text"
+    },
+    {
+      "id": "tool_04",
+      "category": "tool_selection",
+      "input": "Найди в интернете цену iPhone 16",
+      "expected_tools": [
+        "web_search"
+      ],
+      "description": "Web search → web_search"
+    },
+    {
+      "id": "tool_05",
+      "category": "tool_selection",
+      "input": "Запомни: Милана любит кофе",
+      "expected_tools": [
+        "remember"
+      ],
+      "description": "Memory save → remember"
+    },
+    {
+      "id": "tool_06",
+      "category": "tool_selection",
+      "input": "Конвертируй 100 USD в TMT",
+      "expected_tools": [
+        "convert_currency"
+      ],
+      "description": "Currency conversion → convert_currency"
+    },
+    {
+      "id": "tool_07",
+      "category": "tool_selection",
+      "input": "Запиши доход 500 долларов",
+      "expected_tools": [
+        "set_income"
+      ],
+      "description": "Income recording → set_income"
+    },
+    {
+      "id": "tool_08",
+      "category": "tool_selection",
+      "input": "Найди контакт Милана",
+      "expected_tools": [
+        "find_contact"
+      ],
+      "description": "Contact search → find_contact"
+    },
+    {
+      "id": "tool_09",
+      "category": "tool_selection",
+      "input": "Создай напоминание на завтра в 10:00",
+      "expected_tools": [
+        "create_reminder"
+      ],
+      "description": "Reminder → create_reminder"
+    },
+    {
+      "id": "tool_10",
+      "category": "tool_selection",
+      "input": "Покажи статус заказов",
+      "expected_tools": [
+        "get_orders_status"
+      ],
+      "description": "Order status → get_orders_status"
+    },
+    {
+      "id": "tool_11",
+      "category": "tool_selection",
+      "input": "Запиши расход 300 TMT на офис",
+      "expected_tools": [
+        "set_expense"
+      ],
+      "description": "Expense → set_expense"
+    },
+    {
+      "id": "tool_12",
+      "category": "tool_selection",
+      "input": "Распознай текст с фото",
+      "expected_tools": [
+        "ocr_recognize"
+      ],
+      "description": "OCR → ocr_recognize"
+    },
+    {
+      "id": "tool_13",
+      "category": "tool_selection",
+      "input": "Создай Excel таблицу с клиентами",
+      "expected_tools": [
+        "create_excel"
+      ],
+      "description": "Excel creation → create_excel"
+    },
+    {
+      "id": "tool_14",
+      "category": "tool_selection",
+      "input": "Отправь сообщение в Telegram Кириллу: встреча в 15:00",
+      "expected_tools": [
+        "send_telegram"
+      ],
+      "description": "Telegram message → send_telegram"
+    },
+    {
+      "id": "tool_15",
+      "category": "tool_selection",
+      "input": "Подключи плагин weather",
+      "expected_tools": [
+        "plugin_connect"
+      ],
+      "description": "Plugin → plugin_connect"
+    },
+    {
+      "id": "quality_01",
+      "category": "response_quality",
+      "query": "Привет",
+      "answer": "Привет! Как дела?",
+      "min_score": 0.7,
+      "description": "Good short answer"
+    },
+    {
+      "id": "quality_02",
+      "category": "response_quality",
+      "query": "Расскажи о Python",
+      "answer": "",
+      "min_score": 0.0,
+      "max_score": 0.1,
+      "description": "Empty answer → low score"
+    },
+    {
+      "id": "quality_03",
+      "category": "response_quality",
+      "query": "Что такое AI?",
+      "answer": "{\"action\": \"tool_call\", \"name\": \"search\"}",
+      "min_score": 0.0,
+      "max_score": 0.85,
+      "description": "JSON leak → penalty"
+    },
+    {
+      "id": "quality_04",
+      "category": "response_quality",
+      "query": "Помоги мне",
+      "answer": "К сожалению, я не могу помочь вам с этим запросом.",
+      "min_score": 0.0,
+      "max_score": 0.75,
+      "description": "Hallucination marker → penalty"
+    },
+    {
+      "id": "quality_05",
+      "category": "response_quality",
+      "query": "Расскажи подробно о машинном обучении, нейронных сетях и глубоком обучении",
+      "answer": "Ок",
+      "min_score": 0.0,
+      "max_score": 0.7,
+      "description": "Too brief for complex query → penalty"
+    },
+    {
+      "id": "quality_06",
+      "category": "response_quality",
+      "query": "Привет",
+      "answer": "Привет. Привет. Привет. Привет. Привет. Привет. Привет. Привет.",
+      "min_score": 0.0,
+      "max_score": 0.75,
+      "description": "Excessive repetition → penalty"
+    },
+    {
+      "id": "quality_07",
+      "category": "response_quality",
+      "query": "Какой курс доллара?",
+      "answer": "Текущий курс доллара: 1 USD = 19.5 TMT (официальный), 1 USD = 38-39 TMT (рыночный).",
+      "min_score": 0.7,
+      "description": "Good informative answer"
+    },
+    {
+      "id": "quality_08",
+      "category": "response_quality",
+      "query": "Создай заказ",
+      "answer": "Заказ #1234 создан успешно. 5 позиций на сумму 2500 TMT.",
+      "min_score": 0.6,
+      "description": "Good tool response"
+    },
+    {
+      "id": "quality_09",
+      "category": "response_quality",
+      "query": "Что нового?",
+      "answer": "Вот последние обновления: 3 новых заказа, 2 сообщения, баланс +500 TMT.",
+      "min_score": 0.5,
+      "description": "Summary answer"
+    },
+    {
+      "id": "quality_10",
+      "category": "response_quality",
+      "query": "Помоги",
+      "answer": "abc",
+      "min_score": 0.0,
+      "max_score": 0.5,
+      "description": "Too short → penalty"
+    },
+    {
+      "id": "subagent_01",
+      "category": "sub_agent_classification",
+      "node_description": "Найди информацию о курсе доллара",
+      "node_tool_name": null,
+      "expected_type": "research",
+      "description": "Search task → RESEARCH"
+    },
+    {
+      "id": "subagent_02",
+      "category": "sub_agent_classification",
+      "node_description": "Рассчитай процент прибыли",
+      "node_tool_name": null,
+      "expected_type": "analysis",
+      "description": "Calculation → ANALYSIS"
+    },
+    {
+      "id": "subagent_03",
+      "category": "sub_agent_classification",
+      "node_description": "Выполни create_order",
+      "node_tool_name": "create_order",
+      "expected_type": "tool",
+      "description": "Has tool_name → TOOL"
+    },
+    {
+      "id": "subagent_04",
+      "category": "sub_agent_classification",
+      "node_description": "Напиши отчёт о продажах",
+      "node_tool_name": null,
+      "expected_type": "creative",
+      "description": "Write report → CREATIVE"
+    },
+    {
+      "id": "subagent_05",
+      "category": "sub_agent_classification",
+      "node_description": "Сделай что-то",
+      "node_tool_name": null,
+      "expected_type": "generic",
+      "description": "No keywords → GENERIC"
+    },
+    {
+      "id": "subagent_06",
+      "category": "sub_agent_classification",
+      "node_description": "Поиск в интернете о конкурентах",
+      "node_tool_name": null,
+      "expected_type": "research",
+      "description": "Web search → RESEARCH"
+    },
+    {
+      "id": "subagent_07",
+      "category": "sub_agent_classification",
+      "node_description": "Сравни цены и вычисли разницу",
+      "node_tool_name": null,
+      "expected_type": "analysis",
+      "description": "Compare+compute → ANALYSIS"
+    },
+    {
+      "id": "subagent_08",
+      "category": "sub_agent_classification",
+      "node_description": "Создай текст письма клиенту",
+      "node_tool_name": null,
+      "expected_type": "creative",
+      "description": "Create text → CREATIVE"
+    },
+    {
+      "id": "subagent_09",
+      "category": "sub_agent_classification",
+      "node_description": "Выполни web_search",
+      "node_tool_name": "web_search",
+      "expected_type": "tool",
+      "description": "Has tool_name → TOOL"
+    },
+    {
+      "id": "subagent_10",
+      "category": "sub_agent_classification",
+      "node_description": "Узнай что за товар по артикулу",
+      "node_tool_name": null,
+      "expected_type": "research",
+      "description": "Узнай → RESEARCH"
+    },
+    {
+      "id": "subagent_11",
+      "category": "sub_agent_classification",
+      "node_description": "Анализ данных о клиентах",
+      "node_tool_name": null,
+      "expected_type": "analysis",
+      "description": "Анализ → ANALYSIS"
+    },
+    {
+      "id": "subagent_12",
+      "category": "sub_agent_classification",
+      "node_description": "Сочини приветственное сообщение",
+      "node_tool_name": null,
+      "expected_type": "creative",
+      "description": "Compose → CREATIVE"
+    },
+    {
+      "id": "subagent_13",
+      "category": "sub_agent_classification",
+      "node_description": "Проверь данные в базе",
+      "node_tool_name": null,
+      "expected_type": "research",
+      "description": "Проверь → RESEARCH"
+    },
+    {
+      "id": "subagent_14",
+      "category": "sub_agent_classification",
+      "node_description": "Оцени стоимость доставки",
+      "node_tool_name": null,
+      "expected_type": "analysis",
+      "description": "Оцени → ANALYSIS"
+    },
+    {
+      "id": "subagent_15",
+      "category": "sub_agent_classification",
+      "node_description": "Придумай название для продукта",
+      "node_tool_name": null,
+      "expected_type": "creative",
+      "description": "Придумай → CREATIVE"
+    },
+    {
+      "id": "plan_01",
+      "category": "plan_quality",
+      "plan": {
+        "nodes": {
+          "step_1": {
+            "description": "Найди курс доллара",
+            "depends_on": []
+          },
+          "step_2": {
+            "description": "Рассчитай расходы",
+            "depends_on": [
+              "step_1"
+            ]
+          },
+          "synthesize": {
+            "description": "Собери итог",
+            "depends_on": [
+              "step_2"
+            ]
+          }
+        }
+      },
+      "min_score": 0.6,
+      "description": "Simple linear plan with synthesize"
+    },
+    {
+      "id": "plan_02",
+      "category": "plan_quality",
+      "plan": {
+        "nodes": {
+          "step_1": {
+            "description": "Поиск цен Apple",
+            "depends_on": []
+          },
+          "step_2": {
+            "description": "Поиск цен Samsung",
+            "depends_on": []
+          },
+          "step_3": {
+            "description": "Сравни результаты",
+            "depends_on": [
+              "step_1",
+              "step_2"
+            ]
+          },
+          "synthesize": {
+            "description": "Итоговый отчёт",
+            "depends_on": [
+              "step_3"
+            ]
+          }
+        }
+      },
+      "min_score": 0.8,
+      "description": "Parallel search + comparison + synthesize"
+    },
+    {
+      "id": "plan_03",
+      "category": "plan_quality",
+      "plan": {
+        "nodes": {
+          "step_1": {
+            "description": "Do something",
+            "depends_on": []
+          }
+        }
+      },
+      "min_score": 0.0,
+      "max_score": 0.4,
+      "description": "Single node, no synthesize → low score"
+    },
+    {
+      "id": "plan_04",
+      "category": "plan_quality",
+      "plan": {
+        "nodes": {
+          "step_1": {
+            "description": "Search",
+            "depends_on": [
+              "step_3"
+            ]
+          },
+          "step_2": {
+            "description": "Analyze",
+            "depends_on": []
+          },
+          "synthesize": {
+            "description": "Done",
+            "depends_on": [
+              "step_1",
+              "step_2"
+            ]
+          }
+        }
+      },
+      "min_score": 0.0,
+      "max_score": 0.6,
+      "description": "Orphan dependency (step_3 missing) → penalty"
+    },
+    {
+      "id": "plan_05",
+      "category": "plan_quality",
+      "plan": {
+        "nodes": {
+          "step_1": {
+            "description": "Найди A",
+            "depends_on": []
+          },
+          "step_2": {
+            "description": "Найди B",
+            "depends_on": []
+          },
+          "step_3": {
+            "description": "Найди C",
+            "depends_on": []
+          },
+          "step_4": {
+            "description": "Сравни",
+            "depends_on": [
+              "step_1",
+              "step_2",
+              "step_3"
+            ]
+          },
+          "synthesize": {
+            "description": "Итог",
+            "depends_on": [
+              "step_4"
+            ]
+          }
+        }
+      },
+      "min_score": 0.8,
+      "description": "3-way parallel + join + synthesize → excellent"
+    },
+    {
+      "id": "verifier_01",
+      "category": "task_verifier",
+      "task": "Привет",
+      "result": "Привет! Рад тебя видеть!",
+      "min_score": 0.5,
+      "description": "Normal greeting response"
+    },
+    {
+      "id": "verifier_02",
+      "category": "task_verifier",
+      "task": "Создай заказ на 10 позиций с подробным описанием каждой",
+      "result": "Ок",
+      "min_score": 0.0,
+      "max_score": 0.6,
+      "description": "Too brief for complex task"
+    },
+    {
+      "id": "verifier_03",
+      "category": "task_verifier",
+      "task": "Помоги",
+      "result": "",
+      "min_score": 0.0,
+      "max_score": 0.2,
+      "description": "Empty result"
+    },
+    {
+      "id": "verifier_04",
+      "category": "task_verifier",
+      "task": "Расскажи о себе",
+      "result": "{\"action\": \"tool_call\", \"name\": \"search\", \"params\": {}}",
+      "min_score": 0.0,
+      "max_score": 0.4,
+      "description": "JSON leak in answer"
+    },
+    {
+      "id": "verifier_05",
+      "category": "task_verifier",
+      "task": "Что нового?",
+      "result": "Вот. Вот. Вот. Вот. Вот. Вот. Вот. Вот.",
+      "min_score": 0.0,
+      "max_score": 0.6,
+      "description": "Repetitive answer"
+    },
+    {
+      "id": "verifier_06",
+      "category": "task_verifier",
+      "task": "Создай таблицу",
+      "result": "К сожалению, я не могу создать таблицу для вас.",
+      "min_score": 0.0,
+      "max_score": 0.4,
+      "description": "Hallucination marker"
+    },
+    {
+      "id": "verifier_07",
+      "category": "task_verifier",
+      "task": "Курс доллара",
+      "result": "Текущий курс: 1 USD = 19.5 TMT (официальный). Рыночный: 38-39 TMT.",
+      "min_score": 0.5,
+      "description": "Good informative answer"
+    },
+    {
+      "id": "verifier_08",
+      "category": "task_verifier",
+      "task": "Привет",
+      "result": "As an AI, I don't have feelings.",
+      "min_score": 0.0,
+      "max_score": 0.4,
+      "description": "AI disclosure marker"
+    },
+    {
+      "id": "llm_complexity_01",
+      "category": "llm_complexity",
+      "input": "Привет",
+      "expected_complexity": "simple",
+      "description": "Short → SIMPLE"
+    },
+    {
+      "id": "llm_complexity_02",
+      "category": "llm_complexity",
+      "input": "Проанализируй рынок",
+      "expected_complexity": "complex",
+      "description": "Analyze → COMPLEX"
+    },
+    {
+      "id": "llm_complexity_03",
+      "category": "llm_complexity",
+      "input": "Сравни iPhone и Samsung",
+      "expected_complexity": "complex",
+      "description": "Compare → COMPLEX"
+    },
+    {
+      "id": "llm_complexity_04",
+      "category": "llm_complexity",
+      "input": "Переведи слово hello",
+      "expected_complexity": "simple",
+      "description": "Translate → SIMPLE"
+    },
+    {
+      "id": "llm_complexity_05",
+      "category": "llm_complexity",
+      "input": "Рассчитай стоимость доставки",
+      "expected_complexity": "complex",
+      "description": "Calculate → COMPLEX"
+    },
+    {
+      "id": "llm_complexity_06",
+      "category": "llm_complexity",
+      "input": "Глубокий анализ конкурентов",
+      "expected_complexity": "reasoning",
+      "description": "Deep analysis → REASONING"
+    },
+    {
+      "id": "llm_complexity_07",
+      "category": "llm_complexity",
+      "input": "Кратко: что такое Python?",
+      "expected_complexity": "simple",
+      "description": "Summarize → SIMPLE"
+    },
+    {
+      "id": "llm_complexity_08",
+      "category": "llm_complexity",
+      "input": "Почему растёт доллар?",
+      "expected_complexity": "complex",
+      "description": "Reasoning why → COMPLEX"
+    },
+    {
+      "id": "llm_complexity_09",
+      "category": "llm_complexity",
+      "input": "Создай подробный план на год",
+      "expected_complexity": "complex",
+      "description": "Generate → COMPLEX"
+    },
+    {
+      "id": "llm_complexity_10",
+      "category": "llm_complexity",
+      "input": "Добрый день, расскажи мне",
+      "expected_complexity": "simple",
+      "description": "Normal short message → SIMPLE by length"
+    },
+    {
+      "id": "f1_01",
+      "category": "f1_metric",
+      "expected_tools": [
+        "web_search"
+      ],
+      "actual_tools": [
+        "web_search"
+      ],
+      "expected_f1": 1.0,
+      "description": "Perfect match"
+    },
+    {
+      "id": "f1_02",
+      "category": "f1_metric",
+      "expected_tools": [
+        "web_search",
+        "translate_text"
+      ],
+      "actual_tools": [
+        "web_search"
+      ],
+      "expected_f1_min": 0.6,
+      "expected_f1_max": 0.7,
+      "description": "Missing one tool"
+    },
+    {
+      "id": "f1_03",
+      "category": "f1_metric",
+      "expected_tools": [
+        "web_search"
+      ],
+      "actual_tools": [
+        "web_search",
+        "translate_text"
+      ],
+      "expected_f1_min": 0.6,
+      "expected_f1_max": 0.7,
+      "description": "Extra tool selected"
+    },
+    {
+      "id": "f1_04",
+      "category": "f1_metric",
+      "expected_tools": [
+        "web_search"
+      ],
+      "actual_tools": [
+        "translate_text"
+      ],
+      "expected_f1": 0.0,
+      "description": "Completely wrong tool"
+    },
+    {
+      "id": "f1_05",
+      "category": "f1_metric",
+      "expected_tools": [],
+      "actual_tools": [],
+      "expected_f1": 1.0,
+      "description": "No tools expected or used"
+    },
+    {
+      "id": "f1_06",
+      "category": "f1_metric",
+      "expected_tools": [
+        "create_order",
+        "set_income"
+      ],
+      "actual_tools": [
+        "create_order",
+        "set_income"
+      ],
+      "expected_f1": 1.0,
+      "description": "Perfect multi-tool match"
+    },
+    {
+      "id": "f1_07",
+      "category": "f1_metric",
+      "expected_tools": [
+        "create_order",
+        "set_income",
+        "get_financial_summary"
+      ],
+      "actual_tools": [
+        "create_order",
+        "set_income"
+      ],
+      "expected_f1_min": 0.7,
+      "expected_f1_max": 0.85,
+      "description": "2 of 3 tools correct"
+    },
+    {
+      "id": "scorer_01",
+      "category": "self_attention",
+      "goal": "Найди курс доллара",
+      "result": "Курс доллара: 1 USD = 19.5 TMT",
+      "min_score": 0.3,
+      "description": "Relevant result → decent score"
+    },
+    {
+      "id": "scorer_02",
+      "category": "self_attention",
+      "goal": "Создай заказ",
+      "result": "",
+      "expected_score": 0.0,
+      "description": "Empty result → 0.0"
+    },
+    {
+      "id": "scorer_03",
+      "category": "self_attention",
+      "goal": "Привет",
+      "result": "Привет! Как дела?",
+      "min_score": 0.2,
+      "description": "Simple overlap → some score"
+    },
+    {
+      "id": "scorer_04",
+      "category": "self_attention",
+      "goal": "Рассчитай прибыль за месяц",
+      "result": "Совершенно другая тема не связанная с запросом вообще никак",
+      "min_score": 0.0,
+      "max_score": 0.3,
+      "description": "Irrelevant result → low score"
+    },
+    {
+      "id": "scorer_05",
+      "category": "self_attention",
+      "goal": "Переведи hello на русский",
+      "result": "Привет (перевод hello на русский)",
+      "min_score": 0.2,
+      "description": "Good translation result"
+    },
+    {
+      "id": "oscillation_01",
+      "category": "oscillation",
+      "steps": [
+        {
+          "action_type": "tool_call",
+          "tool_name": "search"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "translate"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "search"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "translate"
+        }
+      ],
+      "expected_oscillation": true,
+      "description": "ABAB pattern → oscillation detected"
+    },
+    {
+      "id": "oscillation_02",
+      "category": "oscillation",
+      "steps": [
+        {
+          "action_type": "tool_call",
+          "tool_name": "search"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "translate"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "summarize"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "format"
+        }
+      ],
+      "expected_oscillation": false,
+      "description": "No pattern → no oscillation"
+    },
+    {
+      "id": "oscillation_03",
+      "category": "oscillation",
+      "steps": [
+        {
+          "action_type": "tool_call",
+          "tool_name": "search"
+        },
+        {
+          "action_type": "tool_call",
+          "tool_name": "search"
+        }
+      ],
+      "expected_oscillation": false,
+      "description": "Too few steps → no oscillation"
+    },
+    {
+      "id": "sanitize_01",
+      "category": "answer_sanitize",
+      "input": "<think>thinking here</think>Вот ответ",
+      "expected_contains": "Вот ответ",
+      "expected_not_contains": "<think>",
+      "description": "Think tags stripped"
+    },
+    {
+      "id": "sanitize_02",
+      "category": "answer_sanitize",
+      "input": "{\"answer\": \"Готово!\"}",
+      "expected_result": "Готово!",
+      "description": "JSON wrapper extracted"
+    },
+    {
+      "id": "sanitize_03",
+      "category": "answer_sanitize",
+      "input": "Простой текст без изменений",
+      "expected_result": "Простой текст без изменений",
+      "description": "Plain text unchanged"
+    },
+    {
+      "id": "sanitize_04",
+      "category": "answer_sanitize",
+      "input": "",
+      "expected_result": "",
+      "description": "Empty → empty"
+    },
+    {
+      "id": "rate_limit_01",
+      "category": "rate_limiting",
+      "tool_name": "fast_tool",
+      "limit": 3,
+      "calls": 5,
+      "expected_blocked_after": 3,
+      "description": "Rate limit blocks after limit reached"
+    },
+    {
+      "id": "rate_limit_02",
+      "category": "rate_limiting",
+      "tool_name": "normal_tool",
+      "limit": 100,
+      "calls": 50,
+      "expected_blocked_after": -1,
+      "description": "Under limit → no blocking"
+    },
+    {
+      "id": "blocklist_01",
+      "category": "tool_blocklist",
+      "blocked_tools": [
+        "dangerous_tool",
+        "admin_reset"
+      ],
+      "test_tool": "dangerous_tool",
+      "expected_blocked": true,
+      "description": "Blocked tool is rejected"
+    },
+    {
+      "id": "blocklist_02",
+      "category": "tool_blocklist",
+      "blocked_tools": [
+        "dangerous_tool"
+      ],
+      "test_tool": "safe_tool",
+      "expected_blocked": false,
+      "description": "Non-blocked tool is allowed"
+    },
+    {
+      "id": "param_val_01",
+      "category": "param_validation",
+      "schema": [
+        {
+          "name": "query",
+          "param_type": "string",
+          "required": true
+        }
+      ],
+      "params": {
+        "query": "test"
+      },
+      "expected_valid": true,
+      "description": "Valid required param"
+    },
+    {
+      "id": "param_val_02",
+      "category": "param_validation",
+      "schema": [
+        {
+          "name": "query",
+          "param_type": "string",
+          "required": true
+        }
+      ],
+      "params": {},
+      "expected_valid": false,
+      "description": "Missing required param → invalid"
+    },
+    {
+      "id": "param_val_03",
+      "category": "param_validation",
+      "schema": [
+        {
+          "name": "count",
+          "param_type": "number",
+          "required": true
+        }
+      ],
+      "params": {
+        "count": "42"
+      },
+      "expected_valid": true,
+      "description": "String → number coercion"
+    },
+    {
+      "id": "param_val_04",
+      "category": "param_validation",
+      "schema": [
+        {
+          "name": "active",
+          "param_type": "boolean",
+          "required": true
+        }
+      ],
+      "params": {
+        "active": "да"
+      },
+      "expected_valid": true,
+      "description": "Russian boolean coercion"
+    },
+    {
+      "id": "e2e_01",
+      "category": "end_to_end",
+      "input": "Привет!",
+      "expected_mode": "simple",
+      "expected_tools": [],
+      "min_quality": 0.5,
+      "description": "Greeting → simple mode, no tools"
+    },
+    {
+      "id": "e2e_02",
+      "category": "end_to_end",
+      "input": "Сколько будет 2+2?",
+      "expected_mode": "simple",
+      "expected_tools": [],
+      "min_quality": 0.5,
+      "description": "Math question → simple, no tools"
+    },
+    {
+      "id": "e2e_03",
+      "category": "end_to_end",
+      "input": "Проанализируй и сравни цены, исследуй рынок и создай отчёт по шагам",
+      "expected_mode": "planned",
+      "expected_tools": [],
+      "min_quality": 0.4,
+      "description": "Complex multi-step → planned"
+    }
+  ]
+}

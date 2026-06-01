@@ -1,0 +1,18 @@
+{
+  "name": "@openclaw/manus-bridge",
+  "version": "2026.5.30",
+  "private": true,
+  "description": "WebSocket IPC bridge to OpenManus Python agent (no CLI spawn per turn)",
+  "type": "module",
+  "dependencies": {
+    "undici": "^8.3.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@openclaw/plugin-sdk": "workspace:*",
+    "@types/ws": "^8.5.14"
+  },
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  }
+}

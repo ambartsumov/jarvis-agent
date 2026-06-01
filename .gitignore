@@ -1,0 +1,87 @@
+# ─── Jarvis Agent — gitignore ───────────────────────────────────────────────
+
+# Secrets & credentials
+.env
+*.env
+!*.env.example
+!**/.env.example
+*.session
+*.session-journal
+credentials/
+pds_ultimate/credentials/
+*token*.json
+gmail_token.json
+**/config.toml
+**/mcp.json
+pds_ultimate/config/openclaw.hybrid.json
+config/openclaw.hybrid.json
+pds_ultimate/config/openclaw.hybrid.json.*
+pds_ultimate/config/*.bak*
+
+# Runtime data
+data/
+logs/
+uploads/
+output/
+pds_ultimate/data/
+pds_ultimate/logs/
+*.db
+*.sqlite
+*.sqlite3
+*.lock
+.agent.lock
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Node / OpenClaw (installed, not vendored)
+vendor/
+node_modules/
+pds_ultimate/openclaw-main*/
+pds_ultimate/openclaw-runtime/
+openclaw-main*/
+
+# Build artifacts
+dist/
+dist-runtime/
+OpenManus-main/logs/
+OpenManus-main/workspace/taskmaster/server.log
+
+# Models & heavy files
+*.zip
+vosk_models/
+whisper_models/
+vosk/vosk-model-*/
+re
+*.png
+!docs/**/*.png
+!OpenManus-main/assets/**
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+.sixth/
+
+# Old upstream copy — replaced by vosk/ directory
+Sharetape-Speech-To-Text-main/
+
+# Misc local
+audit_report.json
+ainura_friend.txt
+aynurapodruga.txt
+pobeda.txt
+num1.txt
+123.py
+audit_v4.py
+pds_ultimate/advanced_calculator/

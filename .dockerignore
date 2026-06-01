@@ -1,0 +1,64 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# PDS-Ultimate — Docker Ignore
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.py[cod]
+*.egg-info
+*.egg
+dist/
+build/
+
+# Virtual env
+.venv
+venv
+env
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Runtime data (rebuild inside container)
+pds_ultimate/data/pds_ultimate.db
+pds_ultimate/data/whisper_models/
+pds_ultimate/data/wa_browser/
+pds_ultimate/data/backups/
+pds_ultimate/data/gmail_token.json
+pds_ultimate/data/calendar_token.json
+pds_ultimate/logs/
+
+# Credentials (mounted as volume)
+pds_ultimate/credentials/
+
+# Env files (passed via --env-file)
+pds_ultimate/.env
+
+# Tests (not needed in production image)
+pds_ultimate/tests/
+tests/
+
+# Telethon sessions
+*.session
+*.session-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.md
+!pds_ultimate/README.md
+*.json
+!pds_ultimate/requirements.txt
+.pytest_cache/
+102.py
+MASTER_SPEC_v2.md
+photo_*
+дуадо.json

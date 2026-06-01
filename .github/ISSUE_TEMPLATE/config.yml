@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/qwert2009/jarvis-agent/blob/main/docs/DEPLOYMENT.md
+    about: Read deployment and configuration guides
+  - name: Security
+    url: https://github.com/qwert2009/jarvis-agent/blob/main/SECURITY.md
+    about: Report a vulnerability privately

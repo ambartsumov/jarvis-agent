@@ -1,0 +1,51 @@
+{
+  "id": "manus-bridge",
+  "name": "OpenManus Bridge",
+  "description": "Fast WebSocket IPC to OpenManus Python agent — streams thoughts/tools back to OpenClaw channels.",
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "wsUrl": {
+        "type": "string",
+        "default": "ws://127.0.0.1:8765/manus",
+        "description": "OpenManus bridge WebSocket URL"
+      },
+      "enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "interceptAgent": {
+        "type": "boolean",
+        "default": true,
+        "description": "Route all channel messages to OpenManus via before_agent_reply hook"
+      },
+      "skipHeartbeat": {
+        "type": "boolean",
+        "default": true
+      },
+      "telegramProgress": {
+        "type": "boolean",
+        "default": true,
+        "description": "Show live progress bar in Telegram during Manus runs"
+      },
+      "botToken": {
+        "type": "string",
+        "description": "Telegram bot token for progress messages (defaults to channels.telegram.botToken)"
+      },
+      "proxyUrl": {
+        "type": "string",
+        "description": "HTTP proxy for Telegram Bot API (defaults to channels.telegram.proxy or TG_PROXY)"
+      }
+    }
+  },
+  "uiHints": {
+    "wsUrl": {
+      "label": "Manus Bridge WebSocket URL",
+      "help": "Local OpenManus IPC server (python -m bridge.ws_server). No CLI per message."
+    }
+  }
+}

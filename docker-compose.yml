@@ -1,0 +1,46 @@
+# PDS-Ultimate v2 — Docker Compose
+# docker compose up -d --build
+
+services:
+  pds:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pds-ultimate-v2
+    restart: unless-stopped
+    env_file:
+      - pds_ultimate/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Ashgabat
+      - STT_ENGINE=vosk
+      - STT_LAZY_LOAD=true
+      - STT_UNLOAD_AFTER=true
+      - MEMORY_TOKEN_BUDGET=900
+      - AGENTMEMORY_EXPORT=true
+    volumes:
+      - pds-data:/app/pds_ultimate/data
+      - pds-logs:/app/pds_ultimate/logs
+      - pds-memory:/app/pds_ultimate/data/agentmemory
+      - ./pds_ultimate/credentials:/app/pds_ultimate/credentials:ro
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+          cpus: "1.5"
+    healthcheck:
+      test: ["CMD", "python", "-c", "from pds_ultimate.core.agent import agent; print(agent.name)"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "3"
+
+volumes:
+  pds-data:
+  pds-logs:
+  pds-memory:

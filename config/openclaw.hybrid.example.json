@@ -1,0 +1,98 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "controlUi": {
+      "enabled": false
+    },
+    "auth": {
+      "mode": "token",
+      "token": "GENERATED_BY_render_openclaw_config.py"
+    }
+  },
+  "plugins": {
+    "bundledDiscovery": "compat",
+    "load": {
+      "paths": ["__JARVIS_PLUGIN_PATH__"]
+    },
+    "allow": ["manus-bridge", "telegram", "deepseek"],
+    "entries": {
+      "manus-bridge": {
+        "enabled": true,
+        "config": {
+          "wsUrl": "ws://127.0.0.1:8765/manus",
+          "interceptAgent": true,
+          "skipHeartbeat": true,
+          "telegramProgress": true,
+          "proxyUrl": "http://127.0.0.1:10809"
+        }
+      },
+      "telegram": { "enabled": true },
+      "deepseek": { "enabled": true }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "REPLACE_WITH_TELEGRAM_BOT_TOKEN",
+      "proxy": "http://127.0.0.1:10809",
+      "execApprovals": { "enabled": false }
+    }
+  },
+  "tools": {
+    "exec": {
+      "mode": "full",
+      "host": "gateway",
+      "notifyOnExit": false
+    },
+    "elevated": {
+      "enabled": true,
+      "allowFrom": { "telegram": ["YOUR_TELEGRAM_USER_ID"] }
+    },
+    "fs": { "workspaceOnly": false },
+    "media": {
+      "audio": {
+        "enabled": true,
+        "language": "ru",
+        "echoTranscript": false,
+        "timeoutSeconds": 120,
+        "models": [
+          {
+            "type": "cli",
+            "command": "/usr/bin/python3.12",
+            "args": ["__TRANSCRIBE_CLI__", "{{MediaPath}}"]
+          }
+        ]
+      },
+      "video": { "enabled": true }
+    }
+  },
+  "approvals": {
+    "exec": { "enabled": false },
+    "plugin": { "enabled": false }
+  },
+  "agents": {
+    "defaults": {
+      "maxConcurrent": 3,
+      "model": { "primary": "deepseek/deepseek-chat" }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "identity": { "name": "Jarvis" },
+        "heartbeat": { "every": "0" }
+      }
+    ]
+  },
+  "commands": {
+    "ownerAllowFrom": ["telegram:YOUR_TELEGRAM_USER_ID"]
+  },
+  "messages": {
+    "queue": {
+      "mode": "followup",
+      "debounceMs": 500,
+      "byChannel": { "telegram": "followup" }
+    }
+  }
+}
