@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any, Awaitable, Callable
 
 from pds_ultimate.bridge.manus_client import get_bridge_client
@@ -69,6 +68,16 @@ class HybridManusAgent:
             step_callback=step_callback,
             timeout=float(config.limits.agent_wall_clock_sec),
         )
+
+        # If OpenManus returned nothing useful, fall back to direct LLM response.
+        if not result.answer or result.answer.strip() in ("Готово.", ""):
+            logger.info("HybridManus: empty answer from bridge, falling back to direct LLM")
+            result.answer = await _ethan.direct_response(
+                user_text,
+                history=context.get("history"),
+                style_guide=style_guide,
+                chat_id=chat_id,
+            )
 
         try:
             _ethan.remember_turn(chat_id, "user", user_text)

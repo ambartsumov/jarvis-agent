@@ -97,9 +97,23 @@ class EthanAgent(BaseAgent):
         smalltalk = (
             r"^(привет|здаров|здравствуй(те)?|хай|hello|hi|hey|добр(ое|ый)\b.*|"
             r"спасибо|благодарю|thanks|thank you|ок(ей)?|ok|okay|угу|ага|да|нет|"
-            r"пока|бай|bye|споки|спокойной ночи|как дела|что делаешь|как ты)\.?!?$"
+            r"пока|бай|bye|споки|спокойной ночи|как дела|что делаешь|как ты)\.?!?\??$"
         )
         if re.match(smalltalk, t):
+            return False
+        # Составные приветствия: "привет как дела", "привет, как ты" и т.п.
+        _greeting_words = {"привет", "здаров", "хай", "hi", "hello", "hey"}
+        _task_keywords = re.compile(
+            r"\b(создай|сделай|напиши|найди|покажи|отправь|напомни|помоги|открой|"
+            r"проверь|скачай|загрузи|запусти|переведи|составь|позвони|сохрани|"
+            r"удали|измени|добавь|вычисли|посчитай|дай|включи|выключи|установи)\b"
+        )
+        first_word = t.split()[0].rstrip(",!?.") if t else ""
+        if (
+            first_word in _greeting_words
+            and len(t) <= 80
+            and not _task_keywords.search(t)
+        ):
             return False
         # Всё остальное обрабатывает агент с инструментами.
         return True
@@ -324,7 +338,7 @@ class EthanAgent(BaseAgent):
                         ),
                     })
                     continue
-                final_answer = resp.content or "Готово."
+                final_answer = resp.content or ""
                 step = AgentStep(
                     iteration=iteration, thought=resp.content[:200], action="finish",
                     duration_ms=int((time.monotonic() - t0) * 1000),
@@ -576,7 +590,7 @@ class EthanAgent(BaseAgent):
                 return f"(ошибка под-агента: {exc})"
             rate_limiter.record_tokens(user_id, resp.total_tokens)
             if not resp.tool_calls:
-                return resp.content or "Готово."
+                return resp.content or ""
             messages.append(
                 {"role": "assistant", "content": resp.content or None, "tool_calls": resp.tool_calls})
             exec_results = await self._execute_tool_calls(resp.tool_calls, user_id, cancel_event)

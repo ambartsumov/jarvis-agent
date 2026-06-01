@@ -8,7 +8,6 @@ import os
 import uuid
 from typing import Any, Awaitable, Callable
 
-import websockets
 from websockets.asyncio.client import connect
 
 from pds_ultimate.config import logger
@@ -140,7 +139,7 @@ class ManusBridgeClient:
                 )
 
         if not final_answer:
-            final_answer = "Готово."
+            final_answer = ""  # caller (hybrid_agent) will fall back to direct LLM
         # Extract last meaningful line if full step dump
         if final_answer.startswith("Step ") and "\n" in final_answer:
             lines = [ln for ln in final_answer.split("\n") if ln.strip()]
