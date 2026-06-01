@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install -U pip wheel
+          pip install -r pds_ultimate/requirements.txt
+
+      - name: Generate OpenManus config
+        env:
+          PDS_ULTIMATE_DIR: ${{ github.workspace }}/pds_ultimate
+          DEEPSEEK_API_KEY: test-key-for-ci
+        run: python pds_ultimate/scripts/gen_openmanus_config.py
+
+      - name: Import smoke test
+        run: python scripts/verify_imports.py
+
+      - name: Render OpenClaw config template
+        env:
+          TG_BOT_TOKEN: "000:TEST"
+          TG_OWNER_ID: "1"
+        run: python scripts/render_openclaw_config.py
+
+      - name: Check for committed secrets
+        run: |
+          ! git grep -E 'AA[A-Za-z0-9_-]{30,}' -- ':!*.example' ':!docs/*' || \
+            (echo "Possible bot token in tracked files" && exit 1)
