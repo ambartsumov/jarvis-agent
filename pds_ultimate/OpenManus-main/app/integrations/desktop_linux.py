@@ -105,18 +105,45 @@ def _find_app(name: str) -> str | None:
         "firefox": "firefox",
         "editor": "gnome-text-editor",
         "music": "rhythmbox",
+        "libreoffice": "/usr/bin/libreoffice",
+        "calc": "/usr/bin/libreoffice --calc",
+        "writer": "/usr/bin/libreoffice --writer",
+        "impress": "/usr/bin/libreoffice --impress",
+        "draw": "/usr/bin/libreoffice --draw",
     }
     for key, bin_name in fallbacks.items():
-        if key in q and shutil.which(bin_name):
-            return bin_name
+        if key in q:
+            cmd = bin_name.split()[0]
+            if shutil.which(cmd) or Path(cmd).exists():
+                return bin_name
     return None
 
 
 async def open_app(name: str) -> tuple[bool, str]:
     exec_line = _find_app(name)
     if not exec_line:
-        return await spawn(f"gtk-launch {shlex.quote(name)} 2>/dev/null || xdg-open {shlex.quote(name)}")
-    return await spawn(exec_line + " &")
+        exec_line = f"xdg-open {shlex.quote(name)}"
+    return await spawn(exec_line)
+
+
+async def open_file(path: str) -> tuple[bool, str]:
+    """Open any file with its default application, correctly handling snap/Wayland env."""
+    p = Path(path)
+    if not p.exists():
+        return False, f"File not found: {path}"
+    suffix = p.suffix.lower()
+    # Route xlsx/ods/csv to LibreOffice Calc directly (avoids snap conflict)
+    if suffix in (".xlsx", ".xls", ".ods", ".csv"):
+        return await spawn(f"/usr/bin/libreoffice --calc {shlex.quote(path)}")
+    if suffix in (".docx", ".doc", ".odt", ".rtf"):
+        return await spawn(f"/usr/bin/libreoffice --writer {shlex.quote(path)}")
+    if suffix in (".pptx", ".ppt", ".odp"):
+        return await spawn(f"/usr/bin/libreoffice --impress {shlex.quote(path)}")
+    if suffix == ".pdf":
+        for viewer in ("evince", "okular", "zathura", "chromium"):
+            if shutil.which(viewer):
+                return await spawn(f"{viewer} {shlex.quote(path)}")
+    return await spawn(f"xdg-open {shlex.quote(path)}")
 
 
 async def open_url(url: str) -> tuple[bool, str]:
@@ -470,6 +497,8 @@ async def dispatch(action: str, **kwargs) -> tuple[bool, str]:
         return await run_shell(kwargs.get("command", target))
     if action in ("open_app", "app", "launch"):
         return await open_app(target or kwargs.get("name", ""))
+    if action in ("open_file", "open", "file_open", "xdg_open"):
+        return await open_file(target or kwargs.get("path", "") or kwargs.get("name", ""))
     if action in ("open_url", "url"):
         return await open_url(target or kwargs.get("url", ""))
     if action in ("chrome_profile", "browser_profile"):

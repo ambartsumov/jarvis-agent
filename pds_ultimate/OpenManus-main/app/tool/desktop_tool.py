@@ -19,6 +19,7 @@ TERMINAL/SHELL ACTIONS (prefer these first):
 APP / GUI ACTIONS:
 - open_app: launch app by name (target=telegram|cursor|chromium|...)
 - open_url: open URL in default browser (url=...)
+- open_file: open a FILE with its default app (path=...) — xlsx→LibreOffice Calc, docx→Writer, pdf→Evince, etc. USE THIS to open files.
 - chrome_profile: open Chromium with profile (target=Work|Default)
 - kill_app: kill app by name (target=...)
 - where_am_i: list running apps/windows (call before any GUI action)
@@ -72,7 +73,7 @@ class DesktopTool(BaseTool):
                     "run", "run_root", "sudo", "read_file", "write_file",
                     "find_files", "ports", "user_info",
                     # app/gui
-                    "open_app", "open_url", "chrome_profile", "kill_app",
+                    "open_app", "open_url", "open_file", "chrome_profile", "kill_app",
                     "where_am_i", "active_window", "window_activate", "find_window",
                     "focus_window", "screenshot",
                     # mouse

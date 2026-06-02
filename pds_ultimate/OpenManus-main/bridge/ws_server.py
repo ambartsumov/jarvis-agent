@@ -128,6 +128,7 @@ SHELL / ФАЙЛЫ:
 ПРИЛОЖЕНИЯ:
 - open_app(target=telegram|cursor|chromium) — открыть приложение.
 - open_url(url=...) — открыть URL.
+- open_file(path=...) — открыть ФАЙЛ в нужном приложении (xlsx→LibreOffice Calc, docx→Writer, pdf→Evince, и т.д.).
 - where_am_i — что сейчас открыто (вызывай перед GUI-действиями).
 - active_window — id/название активного окна.
 - window_activate(target=...) — вывести окно на передний план.
