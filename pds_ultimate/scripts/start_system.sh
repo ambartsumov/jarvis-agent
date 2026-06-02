@@ -26,6 +26,9 @@ if [[ -f "$ROOT/.env" ]]; then
 fi
 
 export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-${TG_BOT_TOKEN:-}}"
+export TG_PROXY="${TG_PROXY:-http://127.0.0.1:10809}"
+export HTTP_PROXY="$TG_PROXY"
+export HTTPS_PROXY="$TG_PROXY"
 
 echo "═══════════════════════════════════════════════════════════"
 echo "  PDS + OpenManus + OpenClaw — unified system"

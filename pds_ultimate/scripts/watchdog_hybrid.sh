@@ -7,10 +7,25 @@ JARVIS_ROOT="$(cd "$ROOT/.." && pwd)"
 AGENT_ROOT="$JARVIS_ROOT"
 MANUS_DIR="$ROOT/OpenManus-main"
 OPENCLAW_DIR="${OPENCLAW_DIR:-$JARVIS_ROOT/vendor/openclaw}"
+if [[ ! -d "$OPENCLAW_DIR" ]]; then
+  OPENCLAW_DIR="$ROOT/openclaw-main (1)/openclaw-main"
+fi
 LOG="$ROOT/data/watchdog.log"
 BRIDGE_PORT="${MANUS_BRIDGE_PORT:-8765}"
 GATEWAY_PORT="${OPENCLAW_GATEWAY_PORT:-18789}"
 PYTHON="/usr/bin/python3.12"
+LOCKFILE="$ROOT/data/.watchdog.lock"
+
+# Prevent duplicate watchdog instances
+if [[ -f "$LOCKFILE" ]]; then
+  OLD_PID=$(cat "$LOCKFILE" 2>/dev/null)
+  if [[ -n "$OLD_PID" ]] && kill -0 "$OLD_PID" 2>/dev/null; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Watchdog already running (pid=$OLD_PID), exiting"
+    exit 0
+  fi
+fi
+echo $$ > "$LOCKFILE"
+trap 'rm -f "$LOCKFILE"' EXIT INT TERM
 
 export PYTHONPATH="${ROOT}/.venv/lib/python3.12/site-packages:${AGENT_ROOT}:${MANUS_DIR}"
 export PDS_ULTIMATE_DIR="$ROOT"
@@ -26,6 +41,17 @@ port_up() {
   ss -ltn 2>/dev/null | grep -q ":$1 "
 }
 
+# Load env once at startup so proxy vars are available for both bridge and gateway
+if [[ -f "$ROOT/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$ROOT/.env"
+  set +a
+fi
+export TG_PROXY="${TG_PROXY:-http://127.0.0.1:10809}"
+export HTTP_PROXY="$TG_PROXY"
+export HTTPS_PROXY="$TG_PROXY"
+
 start_bridge() {
   if port_up "$BRIDGE_PORT"; then return 0; fi
   log "Starting bridge on :$BRIDGE_PORT"
@@ -37,13 +63,6 @@ start_bridge() {
 start_gateway() {
   if port_up "$GATEWAY_PORT"; then return 0; fi
   log "Starting gateway on :$GATEWAY_PORT"
-  set -a
-  # shellcheck disable=SC1091
-  source "$ROOT/.env"
-  set +a
-  export TG_PROXY="${TG_PROXY:-http://127.0.0.1:10809}"
-  export HTTP_PROXY="$TG_PROXY"
-  export HTTPS_PROXY="$TG_PROXY"
   export OPENCLAW_CONFIG_PATH="$ROOT/config/openclaw.hybrid.json"
   export OPENCLAW_TELEGRAM=1
   cd "$OPENCLAW_DIR"

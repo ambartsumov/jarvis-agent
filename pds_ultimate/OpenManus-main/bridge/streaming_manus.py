@@ -17,7 +17,7 @@ EventSink = Callable[[str, dict[str, Any]], Awaitable[None] | None]
 class StreamingManus(Manus):
     """Manus with real-time event sink for OpenClaw bridge."""
 
-    max_steps: int = 15
+    max_steps: int = 25
 
     _req_id: str = ""
     _event_sink: Optional[EventSink] = None

@@ -1,6 +1,8 @@
 import math
+import os
 from typing import Dict, List, Optional, Union
 
+import httpx
 import tiktoken
 from openai import (
     APIError,
@@ -29,7 +31,6 @@ from app.schema import (
     Message,
     ToolChoice,
 )
-
 
 REASONING_MODELS = ["o1", "o3-mini"]
 MULTIMODAL_MODELS = [
@@ -89,7 +90,8 @@ class TokenCounter:
                 return self._calculate_high_detail_tokens(width, height)
 
         return (
-            self._calculate_high_detail_tokens(1024, 1024) if detail == "high" else 1024
+            self._calculate_high_detail_tokens(
+                1024, 1024) if detail == "high" else 1024
         )
 
     def _calculate_high_detail_tokens(self, width: int, height: int) -> int:
@@ -222,7 +224,26 @@ class LLM:
             elif self.api_type == "aws":
                 self.client = BedrockClient()
             else:
-                self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
+                # Use HTTP proxy if configured (DeepSeek API may be blocked without it)
+                _proxy_url = (
+                    os.environ.get("HTTPS_PROXY")
+                    or os.environ.get("HTTP_PROXY")
+                    or os.environ.get("ALL_PROXY")
+                    or os.environ.get("TG_PROXY")
+                )
+                if _proxy_url:
+                    _http_client = httpx.AsyncClient(
+                        proxy=_proxy_url,
+                        timeout=httpx.Timeout(120.0, connect=10.0),
+                    )
+                    self.client = AsyncOpenAI(
+                        api_key=self.api_key,
+                        base_url=self.base_url,
+                        http_client=_http_client,
+                    )
+                else:
+                    self.client = AsyncOpenAI(
+                        api_key=self.api_key, base_url=self.base_url)
 
             self.token_counter = TokenCounter(self.tokenizer)
 
@@ -352,8 +373,8 @@ class LLM:
         return formatted_messages
 
     @retry(
-        wait=wait_random_exponential(min=1, max=60),
-        stop=stop_after_attempt(6),
+        wait=wait_random_exponential(min=1, max=10),
+        stop=stop_after_attempt(3),
         retry=retry_if_exception_type(
             (OpenAIError, Exception, ValueError)
         ),  # Don't retry TokenLimitExceeded
@@ -389,8 +410,10 @@ class LLM:
 
             # Format system and user messages with image support check
             if system_msgs:
-                system_msgs = self.format_messages(system_msgs, supports_images)
-                messages = system_msgs + self.format_messages(messages, supports_images)
+                system_msgs = self.format_messages(
+                    system_msgs, supports_images)
+                messages = system_msgs + \
+                    self.format_messages(messages, supports_images)
             else:
                 messages = self.format_messages(messages, supports_images)
 
@@ -463,24 +486,25 @@ class LLM:
             # Re-raise token limit errors without logging
             raise
         except ValueError:
-            logger.exception(f"Validation error")
+            logger.exception("Validation error")
             raise
         except OpenAIError as oe:
-            logger.exception(f"OpenAI API error")
+            logger.exception("OpenAI API error")
             if isinstance(oe, AuthenticationError):
                 logger.error("Authentication failed. Check API key.")
             elif isinstance(oe, RateLimitError):
-                logger.error("Rate limit exceeded. Consider increasing retry attempts.")
+                logger.error(
+                    "Rate limit exceeded. Consider increasing retry attempts.")
             elif isinstance(oe, APIError):
                 logger.error(f"API error: {oe}")
             raise
         except Exception:
-            logger.exception(f"Unexpected error in ask")
+            logger.exception("Unexpected error in ask")
             raise
 
     @retry(
-        wait=wait_random_exponential(min=1, max=60),
-        stop=stop_after_attempt(6),
+        wait=wait_random_exponential(min=1, max=10),
+        stop=stop_after_attempt(3),
         retry=retry_if_exception_type(
             (OpenAIError, Exception, ValueError)
         ),  # Don't retry TokenLimitExceeded
@@ -521,7 +545,8 @@ class LLM:
                 )
 
             # Format messages with image support
-            formatted_messages = self.format_messages(messages, supports_images=True)
+            formatted_messages = self.format_messages(
+                messages, supports_images=True)
 
             # Ensure the last message is from the user to attach images
             if not formatted_messages or formatted_messages[-1]["role"] != "user":
@@ -549,7 +574,8 @@ class LLM:
                         {"type": "image_url", "image_url": {"url": image}}
                     )
                 elif isinstance(image, dict) and "url" in image:
-                    multimodal_content.append({"type": "image_url", "image_url": image})
+                    multimodal_content.append(
+                        {"type": "image_url", "image_url": image})
                 elif isinstance(image, dict) and "image_url" in image:
                     multimodal_content.append(image)
                 else:
@@ -570,7 +596,8 @@ class LLM:
             # Calculate tokens and check limits
             input_tokens = self.count_message_tokens(all_messages)
             if not self.check_token_limit(input_tokens):
-                raise TokenLimitExceeded(self.get_limit_error_message(input_tokens))
+                raise TokenLimitExceeded(
+                    self.get_limit_error_message(input_tokens))
 
             # Set up API parameters
             params = {
@@ -626,7 +653,8 @@ class LLM:
             if isinstance(oe, AuthenticationError):
                 logger.error("Authentication failed. Check API key.")
             elif isinstance(oe, RateLimitError):
-                logger.error("Rate limit exceeded. Consider increasing retry attempts.")
+                logger.error(
+                    "Rate limit exceeded. Consider increasing retry attempts.")
             elif isinstance(oe, APIError):
                 logger.error(f"API error: {oe}")
             raise
@@ -635,8 +663,8 @@ class LLM:
             raise
 
     @retry(
-        wait=wait_random_exponential(min=1, max=60),
-        stop=stop_after_attempt(6),
+        wait=wait_random_exponential(min=1, max=10),
+        stop=stop_after_attempt(3),
         retry=retry_if_exception_type(
             (OpenAIError, Exception, ValueError)
         ),  # Don't retry TokenLimitExceeded
@@ -682,8 +710,10 @@ class LLM:
 
             # Format messages
             if system_msgs:
-                system_msgs = self.format_messages(system_msgs, supports_images)
-                messages = system_msgs + self.format_messages(messages, supports_images)
+                system_msgs = self.format_messages(
+                    system_msgs, supports_images)
+                messages = system_msgs + \
+                    self.format_messages(messages, supports_images)
             else:
                 messages = self.format_messages(messages, supports_images)
 
@@ -708,7 +738,8 @@ class LLM:
             if tools:
                 for tool in tools:
                     if not isinstance(tool, dict) or "type" not in tool:
-                        raise ValueError("Each tool must be a dict with 'type' field")
+                        raise ValueError(
+                            "Each tool must be a dict with 'type' field")
 
             # Set up the completion request
             params = {
@@ -728,7 +759,8 @@ class LLM:
                     temperature if temperature is not None else self.temperature
                 )
 
-            params["stream"] = False  # Always use non-streaming for tool requests
+            # Always use non-streaming for tool requests
+            params["stream"] = False
             response: ChatCompletion = await self.client.chat.completions.create(
                 **params
             )
@@ -757,7 +789,8 @@ class LLM:
             if isinstance(oe, AuthenticationError):
                 logger.error("Authentication failed. Check API key.")
             elif isinstance(oe, RateLimitError):
-                logger.error("Rate limit exceeded. Consider increasing retry attempts.")
+                logger.error(
+                    "Rate limit exceeded. Consider increasing retry attempts.")
             elif isinstance(oe, APIError):
                 logger.error(f"API error: {oe}")
             raise
