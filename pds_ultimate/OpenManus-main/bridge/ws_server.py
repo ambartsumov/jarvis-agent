@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import sys
 import uuid
 from pathlib import Path
@@ -20,6 +21,59 @@ _active: dict[str, asyncio.Task] = {}
 _session_active: dict[str, str] = {}
 _agent: StreamingManus | None = None
 _agent_lock = asyncio.Lock()
+
+# ── Conversational shortcut ──────────────────────────────────────────────────
+_TASK_KEYWORDS = re.compile(
+    r"\b(создай|сделай|напиши|найди|покажи|отправь|напомни|помоги|открой|"
+    r"проверь|скачай|загрузи|запусти|переведи|составь|позвони|сохрани|"
+    r"удали|измени|добавь|вычисли|посчитай|включи|выключи|установи|"
+    r"create|make|write|find|show|send|remind|open|check|download|"
+    r"upload|run|translate|compose|save|delete|change|add|calculate|"
+    r"забронируй|купи|продай|закажи|зарегистрируй|распознай|прочитай)\b",
+    re.IGNORECASE,
+)
+
+_SMALLTALK_PATTERN = re.compile(
+    r"^(привет|здаров|здравствуй(те)?|хай|hello|hi|hey|добр(ое|ый)\b.*|"
+    r"спасибо|благодарю|thanks|thank\s+you|ок(ей)?|ok|okay|угу|ага|"
+    r"пока|бай|bye|споки|спокойной\s+ночи|как\s+дела|что\s+делаешь|"
+    r"как\s+ты|кто\s+ты|что\s+ты\s+умеешь|что\s+ты\s+можешь|"
+    r"что\s+умеешь|расскажи\s+о\s+себе|ты\s+кто|представься)[\s.,!?]*$",
+    re.IGNORECASE,
+)
+
+
+def _is_chat_only(text: str) -> bool:
+    """Return True if message is small-talk/greeting that needs no tool calls."""
+    t = text.strip()
+    if not t:
+        return False
+    if _SMALLTALK_PATTERN.match(t):
+        return True
+    # Short message with no task keywords → conversational
+    if len(t) <= 80 and not _TASK_KEYWORDS.search(t) and len(t.split()) <= 10:
+        return True
+    return False
+
+
+async def _direct_chat_response(message: str, system_extra: str = "") -> str:
+    """Call LLM directly for conversational messages — no tool loop."""
+    try:
+        from app.llm import LLM
+        llm = LLM()
+        system = (
+            "Ты Джарвис — умный живой ассистент. Отвечай на русском языке, "
+            "коротко и по-человечески. Это обычный разговор — не задача. "
+            "Никаких «задача выполнена», «готово» — просто живой ответ."
+        )
+        if system_extra:
+            system = f"{system}\n\n{system_extra}"
+        messages = [{"role": "user", "content": message}]
+        reply = await llm.ask(messages, system_msgs=[{"role": "system", "content": system}])
+        return reply.strip()
+    except Exception as exc:
+        logger.warning(f"_direct_chat_response failed: {exc}")
+        return ""
 
 _BRIDGE_PROMPT = """
 [Личность]
@@ -212,6 +266,17 @@ async def _run_manus(req_id: str, payload: dict[str, Any], send_json) -> None:
     if user_id > 0:
         context["user_id"] = user_id
         os.environ["PDS_DEFAULT_USER_ID"] = str(user_id)
+
+    # ── Conversational shortcut: bypass full agent for simple chat ────────────
+    if _is_chat_only(message):
+        logger.info(
+            f"OpenManus bridge: chat-only shortcut for {message[:40]!r}")
+        extra = build_pds_context(session_id, message, context)
+        answer = await _direct_chat_response(message, extra)
+        if answer:
+            await send_json(event(req_id=req_id, kind="final", content=answer))
+            return  # caller (_task_wrapper) sends done() in finally
+        # If direct call failed, fall through to full agent below
 
     extra = build_pds_context(session_id, message, context)
 

@@ -6,7 +6,8 @@ import json
 from typing import Any, Awaitable, Callable, Optional
 
 from app.agent.manus import Manus
-from app.schema import AgentState, Message
+from app.schema import AgentState
+
 from bridge.activity_ru import tool_title
 from bridge.answer import is_internal_monologue, pick_user_answer
 
@@ -76,7 +77,8 @@ class StreamingManus(Manus):
             if self.current_step >= self.max_steps:
                 self.current_step = 0
                 self.state = AgentState.IDLE
-                final_parts.append(f"Terminated: Reached max steps ({self.max_steps})")
+                final_parts.append(
+                    f"Terminated: Reached max steps ({self.max_steps})")
         from app.sandbox.client import SANDBOX_CLIENT
 
         await SANDBOX_CLIENT.cleanup()
@@ -89,7 +91,7 @@ class StreamingManus(Manus):
                     answer = msg.content.strip()
                     break
         if not answer:
-            answer = "\n".join(final_parts) if final_parts else "Готово."
+            answer = "\n".join(final_parts) if final_parts else ""
         await self._emit("final", content=answer)
         return answer
 
@@ -126,7 +128,7 @@ class StreamingManus(Manus):
         result = await super().act()
         if self.tool_calls:
             tool_msgs = [
-                m for m in self.memory.messages[-len(self.tool_calls) :]
+                m for m in self.memory.messages[-len(self.tool_calls):]
                 if m.role == "tool"
             ]
             for tc, msg in zip(self.tool_calls, tool_msgs):

@@ -42,7 +42,8 @@ class HybridManusAgent:
         step_callback: Callable[[str], Awaitable[None]] | None = None,
     ) -> AgentResponse:
         user_text = message
-        memory_ctx = hierarchical_memory.build_context(chat_id, query=user_text)
+        memory_ctx = hierarchical_memory.build_context(
+            chat_id, query=user_text)
         lessons = ""
         try:
             from pds_ultimate.core.agent.lessons import lesson_book
@@ -59,7 +60,8 @@ class HybridManusAgent:
             "history": (history or [])[-8:],
         }
 
-        logger.info(f"HybridManus: IPC run chat={chat_id} msg={user_text[:60]!r}")
+        logger.info(
+            f"HybridManus: IPC run chat={chat_id} msg={user_text[:60]!r}")
         client = get_bridge_client()
         result = await client.run(
             user_text,
@@ -70,8 +72,18 @@ class HybridManusAgent:
         )
 
         # If OpenManus returned nothing useful, fall back to direct LLM response.
-        if not result.answer or result.answer.strip() in ("Готово.", ""):
-            logger.info("HybridManus: empty answer from bridge, falling back to direct LLM")
+        _bad = result.answer.strip() if result.answer else ""
+        _is_bad = (
+            not _bad
+            or _bad in ("Готово.", "Готово")
+            or _bad.lower().startswith("задача выполнена")
+            or _bad.lower().startswith("the interaction has been completed")
+            or _bad.lower().startswith("принял, работаю")
+            or _bad == "🔄 Принял, работаю…"
+        )
+        if _is_bad:
+            logger.info(
+                "HybridManus: empty answer from bridge, falling back to direct LLM")
             result.answer = await _ethan.direct_response(
                 user_text,
                 history=context.get("history"),
